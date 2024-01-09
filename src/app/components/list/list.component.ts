@@ -16,7 +16,8 @@ import { NgClass } from '@angular/common';
   standalone: true,
   imports: [FormsModule, NgClass],
   template: `<div class="">
-    @for (item of list; track $index) {
+    @if(list.length > 0){
+       @for (item of list; track $index) {
     <div class="flex flex-col  todo-item-selector    ">
       @if(edit[$index]){
       <div class="flex items-center justify-center gap-2 py-2 ">
@@ -62,7 +63,7 @@ import { NgClass } from '@angular/common';
       </div>
       }
     </div>
-    }
+    }}
   </div>`,
 })
 export class ListComponent {

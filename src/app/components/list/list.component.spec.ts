@@ -1,11 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  async,
+  fakeAsync,
+  flush,
+  tick,
+} from '@angular/core/testing';
 
 import { ListComponent } from './list.component';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { toDoItem } from '../../store/ToDoSlice';
+import {
+  TriggerToDoGet,
+  deleteToDos,
+  putToDos,
+  toDoItem,
+} from '../../store/ToDoSlice';
 
 describe('ListComponent', () => {
   let component: ListComponent;
@@ -25,6 +37,50 @@ describe('ListComponent', () => {
     fixture = TestBed.createComponent(ListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('should delete task from from the list', () => {
+    const itemId = 32;
+
+    component.handledelete(itemId);
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith(
+      deleteToDos({ id: itemId })
+    );
+  });
+  it('should update edit list boolean value based on index', () => {
+    const testValues = [false, false, false];
+    const index = 1;
+    component.edit = [...testValues];
+
+    component.handleEdit(index);
+
+    expect(component.edit[index]).toBe(true);
+    expect(component.edit).toEqual([false, true, false]);
+  });
+  it('should handle save edit by getting task data as a prop, updating it if nessasary and sending the api call, then closing the handleEdit by passing index', () => {
+    const testValue = { title: 'Test Task', isActive: true, id: 2 };
+
+    const index = 2;
+
+    const testBooleanValues = [false, false, true];
+    component.edit = [...testBooleanValues];
+    component.handleSaveEdit(testValue, index);
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith(
+      putToDos({ toDoItem: testValue })
+    );
+    expect(component.edit[index]).toBe(false);
+    expect(component.edit).toEqual([false, false, false]);
+  });
+
+  it('should handle check marking the task as complete by sending put request and then triggering get request for all the data', () => {
+    const testValue = { title: 'Test Task', isActive: !true, id: 2 };
+
+    component.handleCheck(testValue);
+    expect(mockStore.dispatch).toHaveBeenCalledOnceWith(
+      putToDos({ toDoItem: testValue })
+    );
   });
   it('should create', () => {
     const fixture = TestBed.createComponent(ListComponent);
