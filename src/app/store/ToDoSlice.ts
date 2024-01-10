@@ -44,7 +44,7 @@ export const putToDos = createAction(
 
 export const deleteToDos = createAction(
   '[delete list]delete list',
-  props<{ id: number }>()
+  props<{ id: string }>()
 );
 
 export const getSingleToDos = createAction(

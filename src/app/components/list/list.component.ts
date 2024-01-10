@@ -16,8 +16,7 @@ import { NgClass } from '@angular/common';
   standalone: true,
   imports: [FormsModule, NgClass],
   template: `<div class="">
-    @if(list.length > 0){
-       @for (item of list; track $index) {
+    @if(list.length > 0){ @for (item of list; track $index) {
     <div class="flex flex-col  todo-item-selector    ">
       @if(edit[$index]){
       <div class="flex items-center justify-center gap-2 py-2 ">
@@ -49,7 +48,7 @@ import { NgClass } from '@angular/common';
         <p [ngClass]="item.isActive ? 'line-through' : ''">{{ item.title }}</p>
 
         <button
-          (click)="handledelete(item.id || 0)"
+          (click)="handledelete(item.id?.toString() || '0')"
           class="px-5 py-1 bg-red-600 text-white rounded-[5px] "
         >
           DELETE
@@ -75,7 +74,7 @@ export class ListComponent {
   constructor(private store: Store) {
     this.listSelector$ = this.store.pipe(select(getList));
   }
-  handledelete(id: number) {
+  handledelete(id: string) {
     this.store.dispatch(deleteToDos({ id }));
   }
   handleEdit(index: number) {

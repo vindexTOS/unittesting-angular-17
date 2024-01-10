@@ -41,7 +41,7 @@ describe('ListComponent', () => {
   });
 
   it('should delete task from from the list', () => {
-    const itemId = 32;
+    const itemId = '32';
 
     component.handledelete(itemId);
 

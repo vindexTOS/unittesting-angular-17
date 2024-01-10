@@ -6,10 +6,17 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, mergeMap, of, throwError } from 'rxjs';
 
 import { Store } from '@ngrx/store';
-import { TriggerToDoGet, getToDos, postToDos } from './ToDoSlice';
+import {
+  TriggerToDoGet,
+  deleteToDos,
+  getToDos,
+  postToDos,
+  putToDos,
+} from './ToDoSlice';
 import { statusError, statusSuccses } from './StatusHanndle/Status.action';
 import { TestScheduler } from 'rxjs/testing';
 import { TestColdObservable } from 'jasmine-marbles/src/test-observables';
+import { effect } from '@angular/core';
 // const source = cold('-a-b-c-|');
 // const expected = cold('--x-y-z-|');
 
@@ -26,6 +33,8 @@ describe('AddToDoEffect', () => {
     todoService = jasmine.createSpyObj('TodoService', [
       'postList',
       'getAllList',
+      'deleteList',
+      'putList',
     ]);
     store = jasmine.createSpyObj('Store', ['dispatch', 'pipe']);
     scheduler = new TestScheduler((actual, expected) => {
@@ -87,7 +96,8 @@ describe('AddToDoEffect', () => {
       );
     });
   });
-  // ERROR
+
+  // POST ERROR
   it('should dispatch an error action when postToDos fails', () => {
     // Arrange
     const action = postToDos({
@@ -106,6 +116,42 @@ describe('AddToDoEffect', () => {
       expect(todoService.postList).toHaveBeenCalledWith(action.toDoItem);
       expect(store.dispatch).not.toHaveBeenCalledWith(
         statusError({ error: 'API ERROR' })
+      );
+    });
+  });
+
+  // DELETE REQUEST
+  it('should dispatch deleteToDos, TriggerToDoGet, and not dispatch statusSuccses when deleteToDos is called successfully', () => {
+    const action = deleteToDos({ id: '1' });
+    const trigger = TriggerToDoGet();
+    todoService.deleteList?.and.returnValue(of({}));
+
+    actions$ = hot('-a', { a: action });
+
+    effects.ToDoRemove$.subscribe(() => {
+      expect(todoService.deleteList).toHaveBeenCalledWith(action.id);
+      expect(store.dispatch).toHaveBeenCalledWith(trigger);
+      expect(store.dispatch).not.toHaveBeenCalledWith(
+        statusSuccses({ succses: 'deleted' })
+      );
+    });
+  });
+  // PUT REQUEST
+  it('should dispatch putToDos, putList , triggerToDoGet, statusSuccsess', () => {
+    const action = putToDos({
+      toDoItem: { title: 'Test Task', isActive: true },
+    });
+    const trigger = TriggerToDoGet();
+
+    todoService.putList.and.returnValue(of({}));
+
+    actions$ = hot('-a', { a: action });
+
+    effects.ToDoPut$.subscribe(() => {
+      expect(todoService.putList).toHaveBeenCalledWith(action.toDoItem);
+      expect(store.dispatch).toHaveBeenCalledWith(trigger);
+      expect(store.dispatch).not.toHaveBeenCalledWith(
+        statusSuccses({ succses: 'updated' })
       );
     });
   });
