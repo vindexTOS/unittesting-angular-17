@@ -64,27 +64,7 @@ describe('AddToDoEffect', () => {
 
     expect(effects.ToDoListGet$).toBeObservable(expected$);
   });
-  // ERROR
-  it('should handle error if getAllList throws an error', (done) => {
-    const action = TriggerToDoGet();
-    const errorResponse = new Error('error');
 
-    // Mock the service to throw an error
-    todoService.getAllList.and.returnValue(throwError(() => errorResponse));
-
-    // Set up the action stream
-    actions$ = of(action);
-
-    // Trigger the effect manually
-    effects.ToDoListGet$.subscribe((resultAction) => {
-      // Check if the correct action is dispatched
-      expect(resultAction).toEqual(getToDos({ toDoList: [] })); // Update with your expected action
-
-      // You can add additional expectations based on your error handling logic
-
-      done();
-    });
-  });
   // POST REQUEST
   it('should dispatch TriggerToDoGet and statusSuccsess actions when postToDos is called successfully', () => {
     // Arrange

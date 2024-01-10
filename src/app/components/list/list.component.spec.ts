@@ -15,6 +15,7 @@ import { of } from 'rxjs';
 import {
   TriggerToDoGet,
   deleteToDos,
+  getList,
   putToDos,
   toDoItem,
 } from '../../store/ToDoSlice';
@@ -75,12 +76,30 @@ describe('ListComponent', () => {
   });
 
   it('should handle check marking the task as complete by sending put request and then triggering get request for all the data', () => {
-    const testValue = { title: 'Test Task', isActive: !true, id: 2 };
+    const testValue = { title: 'Test Task', isActive: true, id: 2 }; // Ensure isActive is initially set to true
 
     component.handleCheck(testValue);
-    expect(mockStore.dispatch).toHaveBeenCalledOnceWith(
-      putToDos({ toDoItem: testValue })
-    );
+
+    const expectedPutAction = putToDos({
+      toDoItem: { title: 'Test Task', isActive: false, id: 2 },
+    });
+    const expectedGetAction = TriggerToDoGet();
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith(expectedPutAction);
+    expect(mockStore.dispatch).toHaveBeenCalledWith(expectedGetAction);
+  });
+
+  it('should dispatch TriggerToDoGet and subscribe to the slector to get all the tasks', () => {
+    const fakeList = [{ id: 1, title: 'task 1', isActive: false }];
+    mockStore.select.and.returnValue(of(fakeList));
+
+    component.ngOnInit();
+
+    const getalltasks = TriggerToDoGet();
+    expect(mockStore.dispatch).toHaveBeenCalledWith(getalltasks);
+
+    expect(component.list).toEqual(fakeList);
+    expect(component.edit).toEqual(new Array(fakeList.length).fill(false));
   });
   it('should create', () => {
     const fixture = TestBed.createComponent(ListComponent);
